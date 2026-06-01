@@ -3,8 +3,8 @@ import random
 import sys
 import pygame
 
-# AIRCRAFT AUTOPILOT with an artificial horizon (attitude indicator).
-# the plane gets knocked around by turbulence. a PID autopilot holds the target
+# AIRCRAFT AUTOPILOT with an artificial horizon.
+# the plane gets pushed around by turbulence (wind duhh) . an autopilot holds the target
 # altitude and keeps the wings level, just like a real "altitude hold" mode.
 # use UP/DOWN arrows to change the target altitude and watch it correct.
 
@@ -29,8 +29,7 @@ class PID:
         return self.kp * err + self.ki * self.integral + self.kd * d
 
 
-# state: pitch (roll of the horizon), altitude, vertical speed
-roll = 0.0          # bank angle in radians
+roll = 0.0          
 altitude = 5000.0
 vspeed = 0.0
 target_alt = 5000.0
@@ -53,24 +52,21 @@ while running:
     roll += random.uniform(-0.02, 0.02)
     vspeed += random.uniform(-0.3, 0.3)
 
-    # ---- autopilot ----
-    # altitude hold: error in altitude -> desired climb/descent -> elevator
+
     alt_err = target_alt - altitude
     elevator = alt_pid.step(alt_err)
     vspeed += (elevator - vspeed) * 0.05
     altitude += vspeed * 0.1
 
-    # wing leveler: drive roll back to 0
     aileron = roll_pid.step(-roll)
     roll += aileron * 0.01
-    roll *= 0.98  # natural damping
+    roll *= 0.98  
 
-    # ---- draw the artificial horizon ----
+    # the horizon
     screen.fill((10, 10, 16))
     cx, cy = W // 2, H // 2
     horizon = pygame.Surface((W, H))
 
-    # sky and ground, rotated by the bank angle and shifted by pitch
     pitch_offset = max(-150, min(150, vspeed * 20))
     horizon.fill((90, 150, 220))  # sky
     pygame.draw.rect(horizon, (120, 85, 50), (0, H // 2 + int(pitch_offset), W, H))  # ground
@@ -78,15 +74,15 @@ while running:
                      (W, H // 2 + int(pitch_offset)), 3)
     rotated = pygame.transform.rotate(horizon, math.degrees(roll))
     rect = rotated.get_rect(center=(cx, cy))
-    # clip into a circular instrument
+
     screen.blit(rotated, rect)
 
-    # fixed aircraft symbol in the middle
+
     pygame.draw.line(screen, (255, 220, 0), (cx - 60, cy), (cx - 20, cy), 4)
     pygame.draw.line(screen, (255, 220, 0), (cx + 20, cy), (cx + 60, cy), 4)
     pygame.draw.circle(screen, (255, 220, 0), (cx, cy), 4)
 
-    # HUD text
+    # ui and layout of the screen 
     screen.blit(font.render(f"ALT  {altitude:6.0f} ft   (target {target_alt:.0f})", True, (230, 230, 230)), (16, 16))
     screen.blit(font.render(f"V/S  {vspeed*60:+5.0f} ft/min", True, (230, 230, 230)), (16, 40))
     screen.blit(font.render(f"BANK {math.degrees(roll):+5.1f} deg", True, (230, 230, 230)), (16, 64))
