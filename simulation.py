@@ -2,6 +2,7 @@ import math
 import random
 import sys
 import pygame
+# DISCLAIMER , most of the comments has been added by Ai as my code didnt have much comments and i told the Ai to explain the code , also remove dead commented code
 
 # AIRCRAFT AUTOPILOT with an artificial horizon.
 # the plane gets pushed around by turbulence (wind duhh) . an autopilot holds the target
